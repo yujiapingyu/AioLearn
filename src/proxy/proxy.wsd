@@ -1,0 +1,31 @@
+@startuml proxy_pattern
+abstract class Subject {
+ +{abstract} void request()
+}
+
+class RealSubject extends Subject {
+ +void request()
+}
+
+class Proxy extends Subject {
+ -real_subject
+ +void request()
+}
+
+Proxy --> RealSubject
+
+note top of Subject
+  定义了RealSubject和Proxy的公共接口，
+  这样就在任何使用RealSubject的地方都可以使用Proxy
+end note
+
+note top of RealSubject
+  定义了Proxy所代表的的真实实体
+end note
+
+note bottom of Proxy
+  保存了一个RealSubject的引用或指针使得代理可以访问实体，
+  并提供一个与Subject的接口相同的接口，这样代理就可以用来代替实体
+end note
+
+@endumld
