@@ -10,7 +10,7 @@
 #include <sys/types.h>
 
 DEFINE_string(path, "/tmp/testfile", "Path to the file to manipulate");
-DEFINE_int32(file_size, 1000, "Length of file in 4k blocks");
+DEFINE_int32(file_size, 10, "Length of file in 4k blocks");
 DEFINE_int32(concurrent_requests, 100, "Number of concurrent requests");
 DEFINE_int32(min_nr, 1, "min_nr");
 DEFINE_int32(max_nr, 1, "max_nr");
@@ -114,7 +114,7 @@ class AIOAdder : public Adder {
     reap_counter_ = 0;
     for (counter_ = 0; counter_ < length_; counter_++) {
       SubmitWrite();
-      Reap();
+      Reap();   // 这个操作其实是边提交边获取结果，也可以把这行注释掉
     }
     ReapRemaining();
   }
@@ -134,7 +134,7 @@ class AIOAdder : public Adder {
     reap_counter_ = 0;
     for (counter_ = 0; counter_ < length_; counter_++) {
         SubmitRead();
-        Reap();
+        Reap(); // 这个操作其实是边提交边获取结果，也可以把这行注释掉
     }
     ReapRemaining();
   }
@@ -159,7 +159,7 @@ class AIOAdder : public Adder {
     }
     delete events;
     
-LOG(INFO) << "Reaped " << num_events << " io_events";
+    LOG(INFO) << "Reaped " << num_events << " io_events";
     reap_counter_ += num_events;
     return num_events;
   }
@@ -192,6 +192,15 @@ LOG(INFO) << "Reaped " << num_events << " io_events";
 };
 
 int main(int argc, char* argv[]) {
+  /*
+    这段代码是一个使用Linux异步IO的示例，它计算了从0到FLAGS_file_size-1的整数之和。
+    它使用了libaio库，该库提供了一种异步IO的方式，可以在IO操作完成之前继续执行其他操作。
+    在这个例子中，程序首先写入FLAGS_file_size个整数到文件中，然后读取这些整数并计算它们的总和。
+    在写入和读取文件时，程序使用了异步IO，这样可以在等待IO操作完成时继续执行其他操作。
+    程序使用了io_setup()函数来初始化异步IO环境，使用io_submit()函数来提交IO请求，使用io_getevents()函数来等待IO操作完成并处理结果。
+    程序使用了AIORequest类来表示IO请求，它有两个子类：AIOWriteRequest和AIOReadRequest，分别表示写入和读取请求。
+    程序还使用了Adder类来表示一个可以添加整数的对象，它有一个子类AIOAdder，它使用AIORequest和Adder来实现异步IO的计算。
+  */
   google::ParseCommandLineFlags(&argc, &argv, true);
   AIOAdder adder(FLAGS_file_size);
   adder.Init();
