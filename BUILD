@@ -6,13 +6,19 @@ cc_proto_library(
     visibility = ["//visibility:public"],
 )
 
+cc_library(
+    name = 'aio',
+    srcs = glob(['src/aio/*.cpp', 'src/aio/*.h']),
+    copts = ['-g'],
+    visibility = ["//visibility:public"],
+)
 
 cc_binary(
     name = 'main_work',
     srcs = glob(['src/*.cpp', 'src/*.h']),
     linkopts = ["-lunwind", "-ltcmalloc", "-laio"],
     copts = ['-g'],
-    deps = ['@brpc//:brpc', ':proto', '@com_github_google_glog//:glog']
+    deps = ['@brpc//:brpc', ':proto', '@com_github_google_glog//:glog', 'aio']
 )
 
 cc_binary(

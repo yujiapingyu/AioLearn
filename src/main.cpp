@@ -8,32 +8,13 @@
 #include <stdio.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include "aio/aio_request.h"
 
 DEFINE_string(path, "/tmp/testfile", "Path to the file to manipulate");
 DEFINE_int32(file_size, 10, "Length of file in 4k blocks");
 DEFINE_int32(concurrent_requests, 100, "Number of concurrent requests");
 DEFINE_int32(min_nr, 1, "min_nr");
 DEFINE_int32(max_nr, 1, "max_nr");
-
-// The size of operation that will occur on the device
-static const int kPageSize = 4096;
-
-class AIORequest {
- public:
-  int* buffer_;
-
-  virtual void Complete(int res) = 0;
-
-  AIORequest() {
-    int ret = posix_memalign(reinterpret_cast<void**>(&buffer_),
-                             kPageSize, kPageSize);
-    CHECK_EQ(ret, 0);
-  }
-
-  virtual ~AIORequest() {
-    free(buffer_);
-  }
-};
 
 class Adder {
  public:
