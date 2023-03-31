@@ -69,6 +69,10 @@ int main()
     }
   }
 
+  // 6. 销毁异步IO上下文
+  io_destroy(context);
+
+  // 7. 关闭文件
   close(fd);
 
   return 0;
